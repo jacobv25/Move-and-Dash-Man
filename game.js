@@ -9,6 +9,7 @@
   let gameRunning = true; 
   let score = 0;
   let resetButton;
+  let usingTimer = false;
   // Projectile generation
   let lastShootTime = 0;
   let shootInterval = 1000;  // Shoot a new projectile every 2 seconds
@@ -39,7 +40,6 @@ function setup() {
   // Assign a callback function for when the button is clicked
   startButton.mouseClicked(startGame);
   createCanvas(800, 600);
-  song.play();
   setupPlayer();
   point = createVector(random(width), random(height));
   gameStart = millis();  // Record the start time of the game
@@ -77,6 +77,7 @@ function draw() {
     text("Danger Points    : " + closeCalls, (width-200) / 2, height / 2 + 100);
     text("______________________ " + score, (width-200) / 2, height / 2 + 150);
     text("Total Points     : " + ((score * 50) + closeCalls), (width-200) / 2, height / 2 + 200);
+    song.stop();
     resetButton.show();  // Show reset button
     return;
   }
@@ -120,10 +121,12 @@ function draw() {
   //***************************************
   //********* Display Timer ***************
   //***************************************
-  let timeLeft = (gameDuration - (millis() - gameStart)) / 1000;
-  fill(255);
-  textSize(24);
-  text("Time left: " + floor(timeLeft), 30, 80);  // floor function is used to display only whole seconds
+  if(usingTimer){
+    let timeLeft = (gameDuration - (millis() - gameStart)) / 1000;
+    fill(255);
+    textSize(24);
+    text("Time left: " + floor(timeLeft), 30, 80);  // floor function is used to display only whole seconds
+  }
   // *************************************
   // Check if it's time to shoot a new projectile
   // *************************************
@@ -139,7 +142,7 @@ function draw() {
     lastSpawnTime = millis();
   }
   //***************************************
-  //**** Move and draw all projectiles ****
+  //************ PROJECTILES **************
   //***************************************
   for (let i = projectiles.length - 1; i >= 0; i--) {
     projectiles[i].update();
@@ -240,6 +243,9 @@ function resetGame() {
   resetButton.hide();  // Hide reset button
   projectiles = []; // Clear all projectiles
   enemies = []; // Clear all enemies
+  //restart song
+  song.stop();
+  song.play();
 }
 
 function createValidSpawnPoint() {
