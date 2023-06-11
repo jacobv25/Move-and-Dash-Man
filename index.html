@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <!-- Including the p5.sound library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/addons/p5.sound.min.js"></script>
+  <script src="player.js"></script>
+  <script src="enemy.js"></script>
+  <script src="projectile.js"></script>
+  <script src="timer.js"></script>
+  <script src="game.js"></script>
+  <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+        }
+        #startButton {
+            font-size: 2em;
+            padding: 10px 20px;
+        }
+        #defaultCanvas0 {
+            display: none; /* hide the canvas */
+        }
+    </style>
+  <title>My Game</title>
+</head>
+<body>
+  <button id="startButton">Start Game</button>
+</body>
+</html>
