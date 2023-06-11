@@ -62,15 +62,21 @@ function draw() {
   }
 
   background(0);
+
+  drawCheckeredBorder(30, 10);  // Adjust borderSize and squareSize as needed
+
   // ***********************************************
   // ** If game has ended, stop the draw function **
   // ***********************************************
   if (!gameRunning) {
     fill(255);
     textSize(32);
-    text("Game Over!", width / 2, height / 2);
+    text("Game Over!", (width-200) / 2, height / 2);
     //display player score
-    text("Score: " + score, width / 2, height / 2 + 50);
+    text("Points Collected : " + score + " x 50 = " + (score * 50), (width-200) / 2, height / 2 + 50);
+    text("Danger Points    : " + closeCalls, (width-200) / 2, height / 2 + 100);
+    text("______________________ " + score, (width-200) / 2, height / 2 + 150);
+    text("Total Points     : " + ((score * 50) + closeCalls), (width-200) / 2, height / 2 + 200);
     resetButton.show();  // Show reset button
     return;
   }
@@ -110,14 +116,14 @@ function draw() {
   //***************************************
   fill(255);
   textSize(24);
-  text("Score: " + score, 10, 30);
+  text("Points: " + score, 30, 50);
   //***************************************
   //********* Display Timer ***************
   //***************************************
   let timeLeft = (gameDuration - (millis() - gameStart)) / 1000;
   fill(255);
   textSize(24);
-  text("Time left: " + floor(timeLeft), 10, 60);  // floor function is used to display only whole seconds
+  text("Time left: " + floor(timeLeft), 30, 80);  // floor function is used to display only whole seconds
   // *************************************
   // Check if it's time to shoot a new projectile
   // *************************************
@@ -212,6 +218,7 @@ function draw() {
     ellipse(player.x, player.y, closeCallDistance * 2);
     noStroke();
   }
+
 }
 
 function keyPressed() {
@@ -300,3 +307,26 @@ function startGame() {
   //loop the music
   song.loop();
 }
+
+function drawCheckeredBorder(borderSize, squareSize) {
+  // Top and bottom borders
+  for (let i = 0; i < width; i += squareSize) {
+    let j = Math.floor(i / squareSize) % 2;
+    for (let k = 0; k < borderSize; k += squareSize) {
+      fill((j + k / squareSize) % 2 ? 255 : 0);
+      rect(i, k, squareSize, squareSize);
+      rect(i, height - k - squareSize, squareSize, squareSize);
+    }
+  }
+  
+  // Left and right borders
+  for (let i = 0; i < height; i += squareSize) {
+    let j = Math.floor(i / squareSize) % 2;
+    for (let k = 0; k < borderSize; k += squareSize) {
+      fill((j + k / squareSize) % 2 ? 255 : 0);
+      rect(k, i, squareSize, squareSize);
+      rect(width - k - squareSize, i, squareSize, squareSize);
+    }
+  }
+}
+
