@@ -91,7 +91,7 @@ function draw() {
   // *************************************
   // *** Check If Game Should Stop *******
   // *************************************
-  if (millis() - gameStart >= gameDuration) {
+  if (usingTimer && millis() - gameStart >= gameDuration) {
     gameRunning = false;
   }
   // *************************************
