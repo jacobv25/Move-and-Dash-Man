@@ -77,6 +77,7 @@ function draw() {
     text("Danger Points    : " + closeCalls, (width-200) / 2, height / 2 + 100);
     text("______________________ " + score, (width-200) / 2, height / 2 + 150);
     text("Total Points     : " + ((score * 50) + closeCalls), (width-200) / 2, height / 2 + 200);
+    text("Press SPACE to restart!", (width-200) / 2, height / 2 + 300);
     song.stop();
     resetButton.show();  // Show reset button
     return;
@@ -152,7 +153,8 @@ function draw() {
     let d = dist(player.x, player.y, projectiles[i].position.x, projectiles[i].position.y);
     if (d < playerSize / 2 + 5 /* projectile radius */) {
       // If the player was hit, reset the game and break the loop
-      resetGame();
+      // resetGame();
+      gameRunning = false;
       break;
     }
 
@@ -164,7 +166,7 @@ function draw() {
     }
   }
   //***************************************
-  //**** Move and draw all the enemies ****
+  //************* ENEMIES *****************
   //***************************************
   for (let i = enemies.length - 1; i >= 0; i--) {
     enemies[i].update();
@@ -174,7 +176,8 @@ function draw() {
     let d = dist(player.x, player.y, enemies[i].position.x, enemies[i].position.y);
     if (d < playerSize / 2 + 10 /* enemy radius */) {
       // If the player was hit, reset the game and break the loop
-      resetGame();
+      // resetGame();
+      gameRunning = false;
       break;
     }    
   }
