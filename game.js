@@ -234,6 +234,10 @@ function keyPressed() {
   if (key === 'p') {
     devMode = !devMode;  // Toggle devMode
   }
+  if(keyCode === 32 && !gameRunning){
+    console.log("reset");
+    resetGame();
+  }
 }
 
 function resetGame() {
