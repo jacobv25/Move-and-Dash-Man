@@ -2,11 +2,13 @@
   // point
   let point;
   let pointSize = 20;
+  let minimumDistance = 200; // Define the minimum distance the point can be from the player
+
   // Timer
   let timer;
   let gameDuration = 10000;  //1,000 milliseconds = 1 seconds
   let gameStart;
-  let gameRunning = true; 
+  let gameRunning = false; 
   let score = 0;
   let resetButton;
   let usingTimer = false;
@@ -27,7 +29,7 @@
   let song;
   let words = [];
   // Start menu
-  let initialStart = true;
+  let startButtonWasPressed = false;
 //#endregion
 
 function preload() {
@@ -41,7 +43,7 @@ function setup() {
   startButton.mouseClicked(startGame);
   createCanvas(800, 600);
   setupPlayer();
-  point = createVector(random(width), random(height));
+  createNewPoint();
   gameStart = millis();  // Record the start time of the game
   // Create a reset button and attach event
   resetButton = createButton('Reset Game');
@@ -51,13 +53,11 @@ function setup() {
   // Setup the first shot
   lastShootTime = millis();
 
-
 }
 
 function draw() {
   // If the game hasn't started yet, don't execute the rest of the draw function
-  if (!gameRunning && initialStart) {
-    initialStart = false;
+  if (!gameRunning && !startButtonWasPressed) {
     return;
   }
 
@@ -110,8 +110,8 @@ function draw() {
   // *************************************
   let distance = dist(player.x, player.y, point.x, point.y);
   if (distance < playerSize / 2 + pointSize / 2) {
-    point = createVector(random(width), random(height));
-    score++;  // increment score
+    createNewPoint(); 
+    score++;  
   }
   //***************************************
   //********* Display Score ***************
@@ -223,6 +223,14 @@ function draw() {
     stroke(255, 0, 0);  // Red color
     ellipse(player.x, player.y, closeCallDistance * 2);
     noStroke();
+
+    // minimumDistance is the minimum spawn distance between the player and the collectable
+    noFill();  // Do not fill the circle
+    stroke(0, 255, 0);  // Set the stroke color to green
+    strokeWeight(2);  // Set the stroke weight
+    ellipse(player.x, player.y, minimumDistance * 2);  // Draw the circle
+    noStroke();
+
   }
 
 }
@@ -234,7 +242,7 @@ function keyPressed() {
   if (key === 'p') {
     devMode = !devMode;  // Toggle devMode
   }
-  if(keyCode === 32 && !gameRunning){
+  if(keyCode === 32 && !gameRunning && startButtonWasPressed){
     console.log("reset");
     resetGame();
   }
@@ -243,7 +251,7 @@ function keyPressed() {
 function resetGame() {
   // Reset game state
   setupPlayer();
-  point = createVector(random(width), random(height));
+  createNewPoint();
   gameStart = millis();
   score = 0;
   gameRunning = true;
@@ -319,6 +327,8 @@ function startGame() {
 
   //loop the music
   song.loop();
+
+  startButtonWasPressed = true;
 }
 
 function drawCheckeredBorder(borderSize, squareSize) {
@@ -341,5 +351,12 @@ function drawCheckeredBorder(borderSize, squareSize) {
       rect(width - k - squareSize, i, squareSize, squareSize);
     }
   }
+}
+
+function createNewPoint() {
+  // Create a point that's far enough from the player
+  do {
+    point = createVector(random(width), random(height));
+  } while (dist(player.x, player.y, point.x, point.y) < minimumDistance);
 }
 
