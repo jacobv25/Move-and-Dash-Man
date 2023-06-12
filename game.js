@@ -32,12 +32,14 @@
   let startButtonWasPressed = false;
 
   //game over screen
+  let gameDurationInSecs;
   let scoreCategories = [
     { name: "Greens Collected Points", value: () => score, multiplier: 50 },
-    { name: "Blues on Screen Points", value: () => enemies.length, multiplier: 10 },
-    { name: "Style Points", value: () => closeCalls, multiplier: 1 }
+    { name: "Blues Destroyed Points", value: () => enemiesDestroyed, multiplier: 10 },
+    { name: "Style Points", value: () => closeCalls, multiplier: 1 },
+    { name: "Time Alive", value: () => gameDurationInSecs, multiplier: 1 }
   ];
-    
+  let enemiesDestroyed = 0;
   let startY, textLineHeight, textStartY, gameOverTextY, separatorY, totalScoreY, restartTextY, textX;
 
 //#endregion
@@ -92,6 +94,7 @@ function draw() {
   
     // Calculate total points
     let totalPoints = 0;
+
     for (let category of scoreCategories) {
       let points = category.value() * category.multiplier;
       totalPoints += points;
@@ -130,6 +133,7 @@ function draw() {
   // *** Check If Game Should Stop *******
   // *************************************
   if (usingTimer && millis() - gameStart >= gameDuration) {
+    gameDurationInSecs = ((millis() - gameStart) / 1000).toFixed(2);
     gameRunning = false;
   }
   // *************************************
@@ -189,8 +193,7 @@ function draw() {
     // Check if the projectile hit the player
     let d = dist(player.x, player.y, projectiles[i].position.x, projectiles[i].position.y);
     if (d < playerSize / 2 + 5 /* projectile radius */) {
-      // If the player was hit, reset the game and break the loop
-      // resetGame();
+      gameDurationInSecs = ((millis() - gameStart) / 1000).toFixed(2);
       gameRunning = false;
       break;
     }
@@ -222,6 +225,7 @@ function draw() {
       if (dEnemy < 5 /* projectile radius */ + 10 /* enemy radius */) {
         // If the projectile hit an enemy, remove the enemy and the projectile
         enemies.splice(j, 1);
+        enemiesDestroyed++;
         playerProjectiles.splice(i, 1);
         break;
       }
@@ -237,8 +241,7 @@ function draw() {
     // Check if the enemy hit the player
     let d = dist(player.x, player.y, enemies[i].position.x, enemies[i].position.y);
     if (d < playerSize / 2 + 10 /* enemy radius */) {
-      // If the player was hit, reset the game and break the loop
-      // resetGame();
+      gameDurationInSecs = ((millis() - gameStart) / 1000).toFixed(2);
       gameRunning = false;
       break;
     }    
