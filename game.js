@@ -30,6 +30,16 @@
   let words = [];
   // Start menu
   let startButtonWasPressed = false;
+
+  //game over screen
+  let scoreCategories = [
+    { name: "Greens Collected Points", value: () => score, multiplier: 50 },
+    { name: "Blues on Screen Points", value: () => enemies.length, multiplier: 10 },
+    { name: "Style Points", value: () => closeCalls, multiplier: 1 }
+  ];
+    
+  let startY, textLineHeight, textStartY, gameOverTextY, separatorY, totalScoreY, restartTextY, textX;
+
 //#endregion
 
 function preload() {
@@ -52,7 +62,15 @@ function setup() {
   resetButton.hide();  // Hide the button until game is over
   // Setup the first shot
   lastShootTime = millis();
-
+  // game over screen
+  startY = (height-200) / 2;
+  textLineHeight = 50;
+  textStartY = startY + textLineHeight;
+  gameOverTextY = startY;
+  separatorY = textStartY + scoreCategories.length * textLineHeight;
+  totalScoreY = separatorY + textLineHeight;
+  restartTextY = totalScoreY + textLineHeight;
+  textX = (width-400) / 2;
 }
 
 function draw() {
@@ -66,23 +84,41 @@ function draw() {
   drawCheckeredBorder(30, 10);  // Adjust borderSize and squareSize as needed
 
   // ***********************************************
-  // ** If game has ended, stop the draw function **
+  // ************  GAME OVER SCREEN  ***************
   // ***********************************************
   if (!gameRunning) {
     fill(255);
     textSize(32);
-    text("Game Over!", (width-400) / 2, (height-400) / 2);
-    //display player score
-    text("Greens Collected Points : " + score + " x 50 = " + (score * 50), (width-400) / 2, (height-200) / 2 + 50);
-    text("Blues on Screen Points  : " + enemies.length * 10, (width-400) / 2, (height-200) / 2 + 100);
-    text("Style Points            : " + closeCalls, (width-400) / 2, (height-200) / 2 + 150);
-    text("____________________________", (width-400) / 2, (height-200) / 2 + 200);
-    text("Total Points            : " + ((score * 50) + closeCalls), (width-400) / 2, (height-200) / 2 + 250);
-    text("Press SPACE to restart!", (width-400) / 2, (height-200) / 2 + 300);
+  
+    // Calculate total points
+    let totalPoints = 0;
+    for (let category of scoreCategories) {
+      let points = category.value() * category.multiplier;
+      totalPoints += points;
+    }
+  
+    // Display "Game Over!" text
+    text("Game Over!", textX, gameOverTextY);
+  
+    // Display score categories
+    for (let i = 0; i < scoreCategories.length; i++) {
+      let category = scoreCategories[i];
+      let points = category.value() * category.multiplier;
+      text(`${category.name} : ${category.value()} x ${category.multiplier} = ${points}`, textX, textStartY + i * textLineHeight);
+    }
+  
+    // Display total points
+    text("____________________________", textX, separatorY);
+    text(`Total Points : ${totalPoints}`, textX, totalScoreY);
+    
+    // Display restart instruction
+    text("Press SPACE to restart!", textX, restartTextY);
+  
     song.stop();
     resetButton.show();  // Show reset button
     return;
   }
+  
   drawPlayer();
   // *************************************
   // ********* Draw Collectable **********
@@ -167,6 +203,31 @@ function draw() {
     }
   }
   //***************************************
+  // ****** PLAYER PROJECTILES ************
+  //***************************************
+  for (let i = playerProjectiles.length - 1; i >= 0; i--) {
+    playerProjectiles[i].update();
+    playerProjectiles[i].draw();
+
+    let dPoint = dist(playerProjectiles[i].position.x, playerProjectiles[i].position.y, point.x, point.y);
+    if (dPoint < 5 /* projectile radius */ + pointSize / 2) {
+      // If the projectile hit the point, move the point and remove the projectile
+      point = createVector(random(width), random(height));
+      playerProjectiles.splice(i, 1);
+      continue;
+    }
+  
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      let dEnemy = dist(playerProjectiles[i].position.x, playerProjectiles[i].position.y, enemies[j].position.x, enemies[j].position.y);
+      if (dEnemy < 5 /* projectile radius */ + 10 /* enemy radius */) {
+        // If the projectile hit an enemy, remove the enemy and the projectile
+        enemies.splice(j, 1);
+        playerProjectiles.splice(i, 1);
+        break;
+      }
+    }
+  }
+  //***************************************
   //************* ENEMIES *****************
   //***************************************
   for (let i = enemies.length - 1; i >= 0; i--) {
@@ -239,6 +300,7 @@ function draw() {
 function keyPressed() {
   if (keyCode === 32 && !dashing) {  // 32 is the keyCode for the spacebar
     dashing = true;
+    shootPlayerProjectile();
   }
   if (key === 'p') {
     devMode = !devMode;  // Toggle devMode
@@ -259,6 +321,7 @@ function resetGame() {
   resetButton.hide();  // Hide reset button
   projectiles = []; // Clear all projectiles
   enemies = []; // Clear all enemies
+  playerProjectiles = []; // Clear all player projectiles
   //restart song
   song.stop();
   song.play();
