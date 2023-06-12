@@ -60,7 +60,7 @@ function setup() {
   // Create a reset button and attach event
   resetButton = createButton('Reset Game');
   resetButton.position(19, 19);
-  resetButton.mousePressed(resetGame);
+  resetButton.mousePressed(() => location.reload());
   resetButton.hide();  // Hide the button until game is over
   // Setup the first shot
   lastShootTime = millis();
