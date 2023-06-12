@@ -71,13 +71,14 @@ function draw() {
   if (!gameRunning) {
     fill(255);
     textSize(32);
-    text("Game Over!", (width-200) / 2, height / 2);
+    text("Game Over!", (width-400) / 2, (height-400) / 2);
     //display player score
-    text("Points Collected : " + score + " x 50 = " + (score * 50), (width-200) / 2, height / 2 + 50);
-    text("Danger Points    : " + closeCalls, (width-200) / 2, height / 2 + 100);
-    text("______________________ " + score, (width-200) / 2, height / 2 + 150);
-    text("Total Points     : " + ((score * 50) + closeCalls), (width-200) / 2, height / 2 + 200);
-    text("Press SPACE to restart!", (width-200) / 2, height / 2 + 300);
+    text("Greens Collected Points : " + score + " x 50 = " + (score * 50), (width-400) / 2, (height-200) / 2 + 50);
+    text("Blues on Screen Points  : " + enemies.length * 10, (width-400) / 2, (height-200) / 2 + 100);
+    text("Style Points            : " + closeCalls, (width-400) / 2, (height-200) / 2 + 150);
+    text("____________________________", (width-400) / 2, (height-200) / 2 + 200);
+    text("Total Points            : " + ((score * 50) + closeCalls), (width-400) / 2, (height-200) / 2 + 250);
+    text("Press SPACE to restart!", (width-400) / 2, (height-200) / 2 + 300);
     song.stop();
     resetButton.show();  // Show reset button
     return;
