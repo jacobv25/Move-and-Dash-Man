@@ -230,6 +230,15 @@ function draw() {
         break;
       }
     }
+    //check if the projectile has already been destroyed
+    if(playerProjectiles[i] != null){ 
+        // Remove the projectile if it moves off screen
+        if (playerProjectiles[i].position.x < 0 || playerProjectiles[i].position.x > width ||
+          playerProjectiles[i].position.y < 0 || playerProjectiles[i].position.y > height) {
+    
+          playerProjectiles.splice(i, 1);   
+        }
+    }
   }
   //***************************************
   //************* ENEMIES *****************
