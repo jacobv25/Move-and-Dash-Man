@@ -1,9 +1,9 @@
 //#region VARIABLES 
-  // point
-  let point;
-  let pointSize = 20;
-  let minimumDistance = 200; // Define the minimum distance the point can be from the player
-
+  // Greenies
+  let greenies = [];  // Array to store all greenies
+  let greenieSize = 20;
+  let minimumDistance = 200; // Define the minimum distance the greenie can spawn from the player
+  let greenieSpawnInterval = 10000;  // 10 seconds in milliseconds
   // Timer
   let timer;
   let gameDuration = 10000;  //1,000 milliseconds = 1 seconds
@@ -42,6 +42,7 @@
   let enemiesDestroyed = 0;
   let startY, textLineHeight, textStartY, gameOverTextY, separatorY, totalScoreY, restartTextY, textX;
 
+
 //#endregion
 
 function preload() {
@@ -55,7 +56,8 @@ function setup() {
   startButton.mouseClicked(startGame);
   createCanvas(800, 600);
   setupPlayer();
-  createNewPoint();
+  // createNewGreenie();
+  setInterval(createNewGreenie, greenieSpawnInterval);
   gameStart = millis();  // Record the start time of the game
   // Create a reset button and attach event
   resetButton = createButton('Reset Game');
@@ -84,7 +86,9 @@ function draw() {
   background(0);
 
   drawCheckeredBorder(30, 10);  // Adjust borderSize and squareSize as needed
-
+  //********* PLAYER ***************
+  drawPlayer();
+  movePlayer();
   // ***********************************************
   // ************  GAME OVER SCREEN  ***************
   // ***********************************************
@@ -121,14 +125,21 @@ function draw() {
     resetButton.show();  // Show reset button
     return;
   }
-  
-  drawPlayer();
-  // *************************************
-  // ********* Draw Collectable **********
-  // *************************************
   fill(0, 255, 0);
-  ellipse(point.x, point.y, pointSize);
-  movePlayer();
+  // ***********************************
+  // ********* GREENIES ******************
+  // ***********************************
+  // Draw all greenies
+  for (let greenie of greenies) {
+    greenie.draw();
+  }
+  // Check for hits
+  for (let i = greenies.length - 1; i >= 0; i--) {
+    if (greenies[i].hit(player)) {
+      greenies.splice(i, 1);  // Remove hit greenie
+      score++;  // Increase score
+    }
+  }
   // *************************************
   // *** Check If Game Should Stop *******
   // *************************************
@@ -146,20 +157,7 @@ function draw() {
       dashTime = 0;
     }
   }
-  // *************************************
-  // ********* Collect Point *************
-  // *************************************
-  let distance = dist(player.x, player.y, point.x, point.y);
-  if (distance < playerSize / 2 + pointSize / 2) {
-    createNewPoint(); 
-    score++;  
-  }
-  //***************************************
-  //********* Display Score ***************
-  //***************************************
-  fill(255);
-  textSize(24);
-  text("Points: " + score, 30, 50);
+
   //***************************************
   //********* Display Timer ***************
   //***************************************
@@ -212,12 +210,15 @@ function draw() {
     playerProjectiles[i].update();
     playerProjectiles[i].draw();
 
-    let dPoint = dist(playerProjectiles[i].position.x, playerProjectiles[i].position.y, point.x, point.y);
-    if (dPoint < 5 /* projectile radius */ + pointSize / 2) {
-      // If the projectile hit the point, move the point and remove the projectile
-      point = createVector(random(width), random(height));
-      playerProjectiles.splice(i, 1);
-      continue;
+    for(let j = greenies.length - 1; j >= 0; j--) {
+      let dGreenie = dist(playerProjectiles[i].position.x, playerProjectiles[i].position.y, greenies[j].x, greenies[j].y);
+      if (dGreenie < 5 /* projectile radius */ + greenieSize / 2) {
+        // If the projectile hit the greenie, remove the greenie
+        greenies.splice(j, 1);
+        greeniesDestroyed++;
+        playerProjectiles.splice(i, 1);
+        continue;
+      }
     }
   
     for (let j = enemies.length - 1; j >= 0; j--) {
@@ -326,7 +327,7 @@ function keyPressed() {
 function resetGame() {
   // Reset game state
   setupPlayer();
-  createNewPoint();
+  createNewGreenie();
   gameStart = millis();
   score = 0;
   gameRunning = true;
@@ -429,10 +430,12 @@ function drawCheckeredBorder(borderSize, squareSize) {
   }
 }
 
-function createNewPoint() {
-  // Create a point that's far enough from the player
+function createNewGreenie() {
+  // Create a greenie that's far enough from the player
+  let newGreenie;
   do {
-    point = createVector(random(width), random(height));
-  } while (dist(player.x, player.y, point.x, point.y) < minimumDistance);
+    position = createVector(random(width), random(height));
+  } while (dist(player.x, player.y, newGreenie.position.x, newGreenie.position.y) < minimumDistance);
+  newGreenie = new Greenie(position.x, position.y, greenieSize);
+  greenies.push(newGreenie);
 }
-
