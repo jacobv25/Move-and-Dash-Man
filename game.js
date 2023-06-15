@@ -54,7 +54,7 @@ function setup() {
   startButton = select('#startButton');
   // Assign a callback function for when the button is clicked
   startButton.mouseClicked(startGame);
-  createCanvas(800, 600);
+  createCanvas(windowWidth-100, windowHeight-100);
   setupPlayer();
   // createNewGreenie();
   setInterval(createNewGreenie, greenieSpawnInterval);
@@ -75,6 +75,26 @@ function setup() {
   totalScoreY = separatorY + textLineHeight;
   restartTextY = totalScoreY + textLineHeight;
   textX = (width-400) / 2;
+  // Audio SFX
+  let volumeSlider = select('#volume');
+  let muteCheckbox = select('#mute');
+
+  volumeSlider.changed(() => {
+    let volume = volumeSlider.value();
+    // Adjust the volume of the game's audio
+    song.setVolume(volume);
+  });
+
+  muteCheckbox.changed(() => {
+    if (muteCheckbox.checked()) {
+      // If the mute box is checked, mute the game's audio
+      song.setVolume(0);
+    } else {
+      // If the mute box is unchecked, restore the volume
+      song.setVolume(volumeSlider.value());
+    }
+  });
+
 }
 
 function draw() {
@@ -127,14 +147,13 @@ function draw() {
   }
   fill(0, 255, 0);
   // ***********************************
-  // ********* GREENIES ******************
+  // ********* GREENIES ****************
   // ***********************************
-  // Draw all greenies
-  for (let greenie of greenies) {
-    greenie.draw();
-  }
-  // Check for hits
   for (let i = greenies.length - 1; i >= 0; i--) {
+    // Draw all greenies and check for hits
+    greenies[i].draw();
+    greenies[i].shootProjectile();
+
     if (greenies[i].hit(player)) {
       greenies.splice(i, 1);  // Remove hit greenie
       score++;  // Increase score
@@ -167,13 +186,7 @@ function draw() {
     textSize(24);
     text("Time left: " + floor(timeLeft), 30, 80);  // floor function is used to display only whole seconds
   }
-  // *************************************
-  // Check if it's time to shoot a new projectile
-  // *************************************
-  if (millis() - lastShootTime >= shootInterval) {
-    shootProjectile();
-    lastShootTime = millis();
-  }
+
   // *************************************
   //Check if it's time to spawn a new enemy
   // *************************************
@@ -189,18 +202,15 @@ function draw() {
     projectiles[i].draw();
 
     // Check if the projectile hit the player
-    let d = dist(player.x, player.y, projectiles[i].position.x, projectiles[i].position.y);
-    if (d < playerSize / 2 + 5 /* projectile radius */) {
+    if (projectiles[i].hitPlayer(player)) {
       gameDurationInSecs = ((millis() - gameStart) / 1000).toFixed(2);
       gameRunning = false;
       break;
     }
-
+    
     // Remove the projectile if it moves off screen
-    if (projectiles[i].position.x < 0 || projectiles[i].position.x > width ||
-        projectiles[i].position.y < 0 || projectiles[i].position.y > height) {
-
-      projectiles.splice(i, 1);   
+    if (projectiles[i].isOffScreen()) {
+      projectiles.splice(i, 1);
     }
   }
   //***************************************
@@ -335,7 +345,12 @@ function resetGame() {
   projectiles = []; // Clear all projectiles
   enemies = []; // Clear all enemies
   playerProjectiles = []; // Clear all player projectiles
-  //restart song
+  greenies = []; // Clear all greenies
+  closeCalls = 0;
+  enemiesDestroyed = 0;
+  greeniesDestroyed = 0;
+  words = [];  // Clear all words
+  // Restart the song
   song.stop();
   song.play();
 }
@@ -393,9 +408,16 @@ function startGame() {
   // Start the game
   gameRunning = true;
   
-  // Hide the start button
+  // Hide the start button and image
   startButton.hide();
-  
+  select('#startScreenImage').hide();
+
+  // Hide the title
+  select('#title').hide();
+
+  // Hide the instructions
+  select('#instructions').hide();
+
   // Show the canvas
   select('#defaultCanvas0').show();
   
@@ -435,7 +457,7 @@ function createNewGreenie() {
   let newGreenie;
   do {
     position = createVector(random(width), random(height));
-  } while (dist(player.x, player.y, newGreenie.position.x, newGreenie.position.y) < minimumDistance);
+  } while (dist(player.x, player.y, position.x, position.y) < minimumDistance);
   newGreenie = new Greenie(position.x, position.y, greenieSize);
   greenies.push(newGreenie);
 }
