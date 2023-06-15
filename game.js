@@ -67,7 +67,7 @@ function setup() {
   // Setup the first shot
   lastShootTime = millis();
   // game over screen
-  startY = (height-200) / 2;
+  startY = (height-350) / 2;
   textLineHeight = 50;
   textStartY = startY + textLineHeight;
   gameOverTextY = startY;
@@ -421,9 +421,6 @@ function startGame() {
   // Show the canvas
   select('#defaultCanvas0').show();
   
-  // Play the music
-  song.play();
-
   //loop the music
   song.loop();
 
